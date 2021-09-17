@@ -1,17 +1,12 @@
 package main
 
 import (
-	"encoding/json"
+	"encoding/csv"
 	"flag"
-	"fmt"
 	"github.com/nullstyle/lassloot"
 	. "github.com/nullstyle/lassloot/cmd/internal/helpers"
 	"log"
 	"os"
-)
-
-var (
-	jsonFlag = flag.Bool("json", false, "output result as json")
 )
 
 func main() {
@@ -22,12 +17,20 @@ func main() {
 		log.Fatalf("failed to create PointCloud: %w", err)
 	}
 
-	if *jsonFlag {
-		err := json.NewEncoder(os.Stdout).Encode(pc)
+	w := csv.NewWriter(os.Stdout)
+	w.Write([]string{"x", "y", "z"})
+	l := pc.Len()
+	for i := (uint64)(0); i < l; i++ {
+		err, point := pc.PointAt(i)
 		if err != nil {
-			log.Fatalln(err)
+			log.Fatalf("failed to get point: %w", err)
 		}
-	} else {
-		fmt.Println("Header:\n%s\n", pc.Header())
+		w.Write(point.CSV())
 	}
+
+	if err := w.Error(); err != nil {
+		log.Fatalln("error writing csv:", err)
+	}
+
+	w.Flush()
 }
