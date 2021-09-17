@@ -47,8 +47,8 @@ func pointToMeshlab(p *lassloot.Point) []string {
 	x, y, z := p.UnoffsetXYZ()
 	return []string{
 		// NOTE:  Meshlab uses Y for height, where LAS files are Z for height
-		fmt.Sprintf("%f", x),
-		fmt.Sprintf("%f", z),
 		fmt.Sprintf("%f", y),
+		fmt.Sprintf("%f", z),
+		fmt.Sprintf("%f", x),
 	}
 }
