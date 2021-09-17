@@ -58,6 +58,26 @@ func (pc *PointCloud) PointAt(idx uint64) (error, *Point) {
 	}
 }
 
+// LocalizeXYZ scales and offsets the provided xyz according to the pointcloud's offset and scale as reflected in the
+// header.
+func (pc *PointCloud) LocalizeXYZ(ix int64, iy int64, iz int64) (ox float64, oy float64, oz float64) {
+	h := pc.fr.Header
+	ox = ((float64)(ix) * h.XScaleFactor) + h.XOffset
+	oy = ((float64)(iy) * h.YScaleFactor) + h.YOffset
+	oz = ((float64)(iz) * h.ZScaleFactor) + h.ZOffset
+	return
+}
+
+// ScaleXYZ scales (but doesnt offset) the provided xyz according to the pointcloud's scale as reflected in
+// the header.
+func (pc *PointCloud) ScaleXYZ(ix int64, iy int64, iz int64) (ox float64, oy float64, oz float64) {
+	h := pc.fr.Header
+	ox = ((float64)(ix) * h.XScaleFactor)
+	oy = ((float64)(iy) * h.YScaleFactor)
+	oz = ((float64)(iz) * h.ZScaleFactor)
+	return
+}
+
 type Header struct {
 	RawHeader las14.PublicHeaderBlock
 	pc        *PointCloud
@@ -68,12 +88,33 @@ type Point struct {
 	pc  *PointCloud
 }
 
-func (p *Point) CSV() []string {
-	data := p.PDR.Get()
-	x, y, z := data.At()
-	return []string{
-		fmt.Sprintf("%d", x),
-		fmt.Sprintf("%d", y),
-		fmt.Sprintf("%d", z),
-	}
+func (p *Point) XYZ() (x float64, y float64, z float64) {
+	pd := p.PDR.Get()
+	x, y, z = p.pc.LocalizeXYZ(pd.XYZ())
+
+	return
+}
+
+func (p *Point) TruncatedXYZ() (x int64, y int64, z int64) {
+	pd := p.PDR.Get()
+	fx, fy, fz := p.pc.LocalizeXYZ(pd.XYZ())
+
+	x = (int64)(fx)
+	y = (int64)(fy)
+	z = (int64)(fz)
+	return
+}
+
+func (p *Point) UnscaledXYZ() (x int64, y int64, z int64) {
+	pd := p.PDR.Get()
+	x, y, z = pd.XYZ()
+
+	return
+}
+
+func (p *Point) UnoffsetXYZ() (x float64, y float64, z float64) {
+	pd := p.PDR.Get()
+	x, y, z = p.pc.ScaleXYZ(pd.XYZ())
+
+	return
 }

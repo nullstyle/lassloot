@@ -13,7 +13,7 @@ type pdr6 struct {
 	pdr *PointDataRecord
 }
 
-func (p *pdr6) At() (x int64, y int64, z int64) {
+func (p *pdr6) XYZ() (x int64, y int64, z int64) {
 	x = (int64)(binary.LittleEndian.Uint32(p.pdr.Raw[0:4]))
 	y = (int64)(binary.LittleEndian.Uint32(p.pdr.Raw[4:8]))
 	z = (int64)(binary.LittleEndian.Uint32(p.pdr.Raw[8:12]))

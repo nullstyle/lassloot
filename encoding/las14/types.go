@@ -84,7 +84,7 @@ type SystemID [32]byte
 type VariableLengthRecord struct{}
 
 type PointData interface {
-	At() (x int64, y int64, z int64)
+	XYZ() (x int64, y int64, z int64)
 	Intensity() uint16
 }
 
